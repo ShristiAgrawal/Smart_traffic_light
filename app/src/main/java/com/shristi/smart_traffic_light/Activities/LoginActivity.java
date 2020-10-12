@@ -3,6 +3,7 @@ package com.shristi.smart_traffic_light.Activities;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -48,6 +49,8 @@ public class LoginActivity extends AppCompatActivity {
                 if(response.isSuccessful())
                 {
                     Toast.makeText(getApplicationContext(),"Successfully logged in",Toast.LENGTH_SHORT).show();
+                    Intent intent=new Intent(LoginActivity.this,MapActivity.class);
+                    startActivity(intent);
 
                 }
                 else {
