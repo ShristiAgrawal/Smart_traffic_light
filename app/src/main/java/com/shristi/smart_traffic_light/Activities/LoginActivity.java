@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(Call<Api_response> call, Response<Api_response> response) {
                 if(response.isSuccessful())
                 {
-                    Toast.makeText(getApplicationContext(),"Successfully logged in",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),response.body().getToken(),Toast.LENGTH_SHORT).show();
                     Intent intent=new Intent(LoginActivity.this,MapActivity.class);
                     startActivity(intent);
 
