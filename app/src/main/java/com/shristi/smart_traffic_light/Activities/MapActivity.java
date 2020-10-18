@@ -27,6 +27,7 @@ import retrofit2.Response;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     GoogleMap map;
+    private ArrayList<ArrayList<Double>> locations;
     private RetrofitService service;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,12 +36,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         service = RetrofitClient.getinstance().create(RetrofitService.class);
 
         Call<route_detail> call = service.getlocation(11.215,77.357,
-                "puluapatti,Tiruppur,Tamil Nadu","Token dbef64a307efc2df5a8cab4827a8a65833f1b5e6");
+                "puluapatti,Tiruppur,Tamil Nadu", "Token dbef64a307efc2df5a8cab4827a8a65833f1b5e6");
 
         call.enqueue(new Callback<route_detail>() {
             @Override
             public void onResponse(Call<route_detail> call, Response<route_detail> response) {
-                Toast.makeText(MapActivity.this,"Response code is "+response.code(),Toast.LENGTH_SHORT).show();
+            locations=response.body().getLocations();
+
+                for(int i=0;i<locations.size();i++){
+            LatLng l=new LatLng(locations.get(i).get(0),locations.get(i).get(1));
+            map.addMarker(new MarkerOptions().position(l).title(""));
+
+        }
 
 
             }
@@ -57,8 +64,5 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map=googleMap;
-        LatLng Raipur=new LatLng(21.253632, 81.635994);
-        map.addMarker(new MarkerOptions().position(Raipur).title("Raipur"));
-        map.moveCamera(CameraUpdateFactory.newLatLng(Raipur));
     }
 }

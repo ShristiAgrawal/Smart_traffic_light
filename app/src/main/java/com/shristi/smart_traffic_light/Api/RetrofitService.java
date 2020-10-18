@@ -11,9 +11,9 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
 public interface RetrofitService {
-    @Headers({ "Content-Type: application/json;charset=UTF-8"})
-    @POST("maps/getRoute/")
     @FormUrlEncoded
+
+    @POST("maps/getRoute/")
     Call<route_detail> getlocation(@Field("originLat") Double lat,@Field("originLng") Double lng, @Field("destination") String dest,
                                    @Header("Authorization") String auth);
     @POST("user/login/")

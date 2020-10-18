@@ -6,16 +6,16 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 
 public class route_detail {
-    @SerializedName("destinationDistance")
+    @SerializedName("destinationWayPoints")
     @Expose
-    private Double destinationDistance;
+    private ArrayList<ArrayList<Double>> locations;
 
-    public Double getDestinationDistance() {
-        return destinationDistance;
+
+    public ArrayList<ArrayList<Double>> getLocations() {
+        return locations;
     }
 
-    public void setDestinationDistance(Double destinationDistance) {
-        this.destinationDistance = destinationDistance;
+    public void setLocations(ArrayList<ArrayList<Double>> locations) {
+        this.locations = locations;
     }
-
 }
