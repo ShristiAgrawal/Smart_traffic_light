@@ -16,13 +16,13 @@
         android:usesCleartextTraffic="true">
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="@string/map_key"></meta-data>
-        <activity android:name=".Activities.LoginActivity">
+        <activity android:name=".Activities.MapActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.MapActivity"></activity>
+        <activity android:name=".Activities.LoginActivity"></activity>
 
         <activity android:name=".MainActivity">
         </activity>
