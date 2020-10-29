@@ -47,7 +47,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             @Override
             public void onResponse(Call<route_detail> call, Response<route_detail> response) {
             locations=response.body().getLocations();
-
+                LatLng latLng = new LatLng(locations.get(0).get(0),locations.get(0).get(1));
+                float zoom = 17;
+                // whatever
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
                 for(int i=0;i<locations.size();i++){
             LatLng l=new LatLng(locations.get(i).get(0),locations.get(i).get(1));
             list.add(l);
