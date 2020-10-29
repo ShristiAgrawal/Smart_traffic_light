@@ -2,6 +2,7 @@ package com.shristi.smart_traffic_light.Activities;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -12,6 +13,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.shristi.smart_traffic_light.Api.RetrofitClient;
 import com.shristi.smart_traffic_light.Api.RetrofitService;
 import com.shristi.smart_traffic_light.Models.Api_response;
@@ -28,7 +31,9 @@ import retrofit2.Response;
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     GoogleMap map;
     private ArrayList<ArrayList<Double>> locations;
+    private ArrayList<LatLng> list=new ArrayList<LatLng>();
     private RetrofitService service;
+    PolylineOptions options;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,9 +50,22 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
                 for(int i=0;i<locations.size();i++){
             LatLng l=new LatLng(locations.get(i).get(0),locations.get(i).get(1));
-            map.addMarker(new MarkerOptions().position(l).title(""));
+            list.add(l);
+                    map.addMarker(new MarkerOptions().position(l).title(""));
 
         }
+                for (int i = 0; i < list.size() - 1; i++) {
+                    LatLng src = list.get(i);
+                    LatLng dest = list.get(i + 1);
+
+                    Polyline line = map.addPolyline(
+                            new PolylineOptions().add(
+                                    new LatLng(src.latitude, src.longitude),
+                                    new LatLng(dest.latitude,dest.longitude)
+                            ).width(10).color(Color.BLUE).geodesic(true)
+                    );
+                }
+
 
 
             }
@@ -57,12 +75,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 Toast.makeText(MapActivity.this,"Error occured",Toast.LENGTH_SHORT).show();
             }
         });
+
         SupportMapFragment mapFragment=(SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map=googleMap;
+        
     }
 }
