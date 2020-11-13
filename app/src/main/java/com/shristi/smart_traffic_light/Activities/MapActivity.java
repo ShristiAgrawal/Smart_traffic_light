@@ -1,20 +1,37 @@
 package com.shristi.smart_traffic_light.Activities;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.animation.ValueAnimator;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -26,6 +43,7 @@ import com.shristi.smart_traffic_light.Models.route_detail;
 import com.shristi.smart_traffic_light.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,36 +53,46 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private Button search;
     private EditText address;
     GoogleMap map;
-    private ArrayList<ArrayList<Double>> locations,hospitalWayPoints;
-    private ArrayList<LatLng> list=new ArrayList<LatLng>();
-    private ArrayList<LatLng> hospitalwaylist=new ArrayList<LatLng>();
+    private Marker marker;
+    private int index,next;
+    private float v;
+    private double lat,lng;
+    private Handler handler;
+
+    private LatLng startPosition, endPosition;
+
+    private ArrayList<ArrayList<Double>> locations, hospitalWayPoints;
+    private ArrayList<LatLng> list = new ArrayList<LatLng>();
+    private ArrayList<LatLng> hospitalwaylist = new ArrayList<LatLng>();
 
     private RetrofitService service;
     PolylineOptions options;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map_login);
-        search=findViewById(R.id.search);
-      address=findViewById(R.id.emergencyaddress);
+        search = findViewById(R.id.search);
+        address = findViewById(R.id.emergencyaddress);
+
         search.setOnClickListener(new View.OnClickListener() {
-        @Override
+            @Override
             public void onClick(View view) {
 
                 service = RetrofitClient.getinstance().create(RetrofitService.class);
 
-                Call<route_detail> call = service.getlocation( 11.215659,77.357261,
+                Call<route_detail> call = service.getlocation(11.215659, 77.357261,
                         address.getText().toString(), "Token dbef64a307efc2df5a8cab4827a8a65833f1b5e6");
 
                 call.enqueue(new Callback<route_detail>() {
                     @Override
                     public void onResponse(Call<route_detail> call, Response<route_detail> response) {
-                        locations=response.body().getLocations();
-                        hospitalWayPoints=response.body()
+                        locations = response.body().getLocations();
+                        hospitalWayPoints = response.body()
                                 .getHospitalWayPoints();
-                        LatLng latLng = new LatLng(locations.get(0).get(0),locations.get(0).get(1));
-                        LatLng latLng2 = new LatLng(locations.get(locations.size()-1).get(0),locations.get(locations.size()-1).get(1));
-                        LatLng latLng3 = new LatLng(hospitalWayPoints.get(hospitalWayPoints.size()-1).get(0),hospitalWayPoints.get(hospitalWayPoints.size()-1).get(1));
+                        final LatLng latLng = new LatLng(locations.get(0).get(0), locations.get(0).get(1));
+                        LatLng latLng2 = new LatLng(locations.get(locations.size() - 1).get(0), locations.get(locations.size() - 1).get(1));
+                        LatLng latLng3 = new LatLng(hospitalWayPoints.get(hospitalWayPoints.size() - 1).get(0), hospitalWayPoints.get(hospitalWayPoints.size() - 1).get(1));
 
 
                         float zoom = 17;
@@ -74,40 +102,129 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         map.addMarker(new MarkerOptions().position(latLng2).title("dest").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                         map.addMarker(new MarkerOptions().position(latLng3).title("hospilat").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
 
-                        for(int i=0;i<locations.size();i++){
-                            LatLng l=new LatLng(locations.get(i).get(0),locations.get(i).get(1));
+                        for (int i = 0; i < locations.size(); i++) {
+                            LatLng l = new LatLng(locations.get(i).get(0), locations.get(i).get(1));
                             list.add(l);
                             //map.addMarker(new MarkerOptions().position(l).title(""));
 
                         }
-                        for(int i=0;i<hospitalWayPoints.size();i++){
-                            LatLng l=new LatLng(hospitalWayPoints.get(i).get(0),hospitalWayPoints.get(i).get(1));
+                        for (int i = 0; i < hospitalWayPoints.size(); i++) {
+                            LatLng l = new LatLng(hospitalWayPoints.get(i).get(0), hospitalWayPoints.get(i).get(1));
                             hospitalwaylist.add(l);
                             //map.addMarker(new MarkerOptions().position(l).title(""));
 
                         }
+                        Polyline bline = null;
                         for (int i = 0; i < list.size() - 1; i++) {
                             LatLng src = list.get(i);
                             LatLng dest = list.get(i + 1);
 
-                            Polyline line = map.addPolyline(
+                            bline = map.addPolyline(
                                     new PolylineOptions().add(
                                             new LatLng(src.latitude, src.longitude),
-                                            new LatLng(dest.latitude,dest.longitude)
+                                            new LatLng(dest.latitude, dest.longitude)
                                     ).width(10).color(Color.BLUE).geodesic(true)
                             );
                         }
+                        // Animation
+                        final ValueAnimator polylineAnimator = ValueAnimator.ofInt(0,100);
+                        polylineAnimator.setDuration(2000);
+                        polylineAnimator.setInterpolator(new LinearInterpolator());
+
+                        final Polyline finalBline = bline;
+                        polylineAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                List<LatLng> points= finalBline.getPoints();
+                                int percentValue=(int)valueAnimator.getAnimatedValue();
+                                int size=points.size();
+                                int newPoints=(int) (size*(percentValue/100.0f));
+                                List<LatLng> p=points.subList(0,newPoints);
+                                finalBline.setPoints(p);
+
+
+
+                            }
+                        });
+                        polylineAnimator.start();
+                        BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.car_marker);
+                        Bitmap b = bitmapdraw.getBitmap();
+                        Bitmap BitMapMarker = Bitmap.createScaledBitmap(b, 110, 60, false);
+
+                        marker=map.addMarker(new MarkerOptions().position(latLng).flat(true)
+                                .icon(BitmapDescriptorFactory.fromBitmap(BitMapMarker)));
+
+
+                         handler=new Handler();
+                        index=-1; next=-1;
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(index<list.size()-1){
+                                    index++;
+                                    next=index+1;
+
+                                }
+                                if(index<list.size()-1){
+                                    startPosition=list.get(index);
+                                    endPosition=list.get(next);
+
+                                }
+                                ValueAnimator valueAnimator = ValueAnimator.ofFloat(0,1);
+                                valueAnimator.setDuration(3000);
+                                valueAnimator.setInterpolator(new LinearInterpolator());
+
+
+                                valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                    @Override
+                                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                        v=valueAnimator.getAnimatedFraction();
+                                        lng=v*endPosition.longitude+(1-v)*startPosition.longitude;
+                                        lat=v*endPosition.latitude+(1-v)*startPosition.latitude;
+                                        LatLng newPos=new LatLng(lat,lng);
+                                        marker.setPosition(newPos);
+                                        marker.setAnchor(0.5f,0.5f);
+                                        marker.setRotation(getBearing(startPosition,newPos));
+                                        map.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                                        .target(newPos).zoom(15.5f).build()));
+
+
+
+                                    }
+                                });
+                                valueAnimator.start();
+                                handler.postDelayed(this,3000);
+                            }
+                        },3000);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                         for (int i = 0; i < hospitalwaylist.size() - 1; i++) {
                             LatLng src = hospitalwaylist.get(i);
                             LatLng dest = hospitalwaylist.get(i + 1);
 
-                            Polyline line = map.addPolyline(
+                             Polyline line = map.addPolyline(
                                     new PolylineOptions().add(
                                             new LatLng(src.latitude, src.longitude),
-                                            new LatLng(dest.latitude,dest.longitude)
+                                            new LatLng(dest.latitude, dest.longitude)
                                     ).width(10).color(Color.RED).geodesic(true)
                             );
                         }
+
 
 
 
@@ -115,22 +232,41 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
                     @Override
                     public void onFailure(Call<route_detail> call, Throwable t) {
-                        Toast.makeText(MapActivity.this,"error",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MapActivity.this, "error", Toast.LENGTH_SHORT).show();
                     }
                 });
 
-                SupportMapFragment mapFragment=(SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
                 mapFragment.getMapAsync(MapActivity.this);
-          }
-});
 
 
+
+            }
+        });
+
+
+    }
+
+    private float getBearing(LatLng startPosition, LatLng newPos) {
+        double lat=Math.abs(startPosition.latitude-newPos.latitude);
+        double lng=Math.abs(startPosition.longitude-newPos.longitude);
+        if(startPosition.latitude<newPos.latitude && startPosition.longitude<newPos.longitude)
+            return (float) (Math.toDegrees(Math.atan(lng/lat))+270);
+        else if(startPosition.latitude>=newPos.latitude && startPosition.longitude<newPos.longitude)
+            return (float) (90-Math.toDegrees(Math.atan(lng/lat))+180);
+        else if(startPosition.latitude>=newPos.latitude && startPosition.longitude>=newPos.longitude)
+            return (float) (90-Math.toDegrees(Math.atan(lng/lat))+180);
+        else if(startPosition.latitude<newPos.latitude && startPosition.longitude>=newPos.longitude)
+            return (float) (90-Math.toDegrees(Math.atan(lng/lat)));
+        return -1;
     }
 
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        map=googleMap;
-        
+
+        map = googleMap;
+
+
     }
 }
