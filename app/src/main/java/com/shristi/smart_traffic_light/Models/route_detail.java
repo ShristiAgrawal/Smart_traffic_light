@@ -12,7 +12,7 @@ public class route_detail {
     @SerializedName("hospitalWayPoints")
     @Expose
     private ArrayList<ArrayList<Double>> hospitalWayPoints;
-  //  "hospitalWayPoints"
+//    "hospitalWayPoints"
 
 
     public ArrayList<ArrayList<Double>> getLocations() {
