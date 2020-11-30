@@ -9,6 +9,9 @@ public class location {
     @SerializedName("lat")
     @Expose
     private Double lat;
+    @SerializedName("id")
+    @Expose
+    private int id;
     @SerializedName("lng")
     @Expose
     private Double lng;
@@ -28,5 +31,13 @@ public class location {
 
     public void setLng(Double lng) {
         this.lng = lng;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

@@ -58,23 +58,31 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private float v;
     private double lat,lng;
     private Handler handler;
-
+    private ArrayList<location> destinationsignals,hospitalsignals;
     private LatLng startPosition, endPosition;
-
+    private int currhospital;
     private ArrayList<ArrayList<Double>> locations, hospitalWayPoints;
     private ArrayList<LatLng> list = new ArrayList<LatLng>();
     private ArrayList<LatLng> hospitalwaylist = new ArrayList<LatLng>();
-
     private RetrofitService service;
     PolylineOptions options;
-
+    private Bitmap BitMapMarker,marker1,marker2;
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map_login);
         search = findViewById(R.id.search);
         address = findViewById(R.id.emergencyaddress);
-
+        currhospital=0;
+        BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.car_marker);
+        Bitmap b = bitmapdraw.getBitmap();
+        BitMapMarker= Bitmap.createScaledBitmap(b, 110, 60, false);
+        BitmapDrawable draw = (BitmapDrawable) getResources().getDrawable(R.drawable.green);
+        Bitmap b2 = draw.getBitmap();
+        marker1= Bitmap.createScaledBitmap(b2, 60, 60, false);
+        BitmapDrawable draw2 = (BitmapDrawable) getResources().getDrawable(R.drawable.redarr);
+        Bitmap b3 = draw2.getBitmap();
+        marker2= Bitmap.createScaledBitmap(b3, 60, 60, false);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -87,6 +95,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 call.enqueue(new Callback<route_detail>() {
                     @Override
                     public void onResponse(Call<route_detail> call, Response<route_detail> response) {
+                        destinationsignals=response.body().getDestinationSignals();
+                        hospitalsignals=response.body().getHospitalSignals();
+
                         locations = response.body().getLocations();
                         hospitalWayPoints = response.body()
                                 .getHospitalWayPoints();
@@ -105,7 +116,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         for (int i = 0; i < locations.size(); i++) {
                             LatLng l = new LatLng(locations.get(i).get(0), locations.get(i).get(1));
                             list.add(l);
-                            //map.addMarker(new MarkerOptions().position(l).title(""));
+
 
                         }
                         for (int i = 0; i < hospitalWayPoints.size(); i++) {
@@ -119,6 +130,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                             LatLng src = list.get(i);
                             LatLng dest = list.get(i + 1);
 
+
                             bline = map.addPolyline(
                                     new PolylineOptions().add(
                                             new LatLng(src.latitude, src.longitude),
@@ -126,6 +138,55 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                                     ).width(10).color(Color.BLUE).geodesic(true)
                             );
                         }
+                        for(int i=0;i<destinationsignals.size();i++){
+                            LatLng src = new LatLng(destinationsignals.get(i).getLat(),destinationsignals.get(i).getLng());
+                            LatLng dest;
+                            if(i!=destinationsignals.size()-1)
+                            dest = new LatLng(destinationsignals.get(i+1).getLat(),destinationsignals.get(i+1).getLng());
+                            else dest=list.get(list.size()-1);
+                            map.addMarker(new MarkerOptions()
+                                    .position(src)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(marker2))
+                                    .rotation(90+getBearing(src,dest)));
+                            map.addMarker(new MarkerOptions()
+                                    .position(src)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(marker2))
+                                    .rotation(270+getBearing(src,dest)));
+                            map.addMarker(new MarkerOptions()
+                                    .position(src)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(marker1))
+                                    .rotation(getBearing(src,dest)));
+                            map.addMarker(new MarkerOptions()
+                                    .position(src)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(marker1))
+                                    .rotation(180+getBearing(src,dest)));
+
+                        }
+//                        for(int i=0;i<hospitalsignals.size();i++){
+//                            LatLng src = new LatLng(hospitalsignals.get(i).getLat(),hospitalsignals.get(i).getLng());
+//                            LatLng dest;
+//                            if(i!=hospitalsignals.size()-1)
+//                                dest = new LatLng(hospitalsignals.get(i+1).getLat(),hospitalsignals.get(i+1).getLng());
+//                            else dest=hospitalwaylist.get(hospitalwaylist.size()-1);
+//                            map.addMarker(new MarkerOptions()
+//                                    .position(src)
+//                                    .icon(BitmapDescriptorFactory.fromBitmap(marker2))
+//                                    .rotation(90+getBearing(src,dest)));
+//                            map.addMarker(new MarkerOptions()
+//                                    .position(src)
+//                                    .icon(BitmapDescriptorFactory.fromBitmap(marker2))
+//                                    .rotation(270+getBearing(src,dest)));
+//                            map.addMarker(new MarkerOptions()
+//                                    .position(src)
+//                                    .icon(BitmapDescriptorFactory.fromBitmap(marker1))
+//                                    .rotation(getBearing(src,dest)));
+//                            map.addMarker(new MarkerOptions()
+//                                    .position(src)
+//                                    .icon(BitmapDescriptorFactory.fromBitmap(marker1))
+//                                    .rotation(180+getBearing(src,dest)));
+//
+//                        }
+
                         // Animation
                         final ValueAnimator polylineAnimator = ValueAnimator.ofInt(0,100);
                         polylineAnimator.setDuration(2000);
@@ -147,9 +208,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                             }
                         });
                         polylineAnimator.start();
-                        BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.car_marker);
-                        Bitmap b = bitmapdraw.getBitmap();
-                        Bitmap BitMapMarker = Bitmap.createScaledBitmap(b, 110, 60, false);
+//
 
                         marker=map.addMarker(new MarkerOptions().position(latLng).flat(true)
                                 .icon(BitmapDescriptorFactory.fromBitmap(BitMapMarker)));
@@ -181,6 +240,22 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                                         v=valueAnimator.getAnimatedFraction();
                                         lng=v*endPosition.longitude+(1-v)*startPosition.longitude;
                                         lat=v*endPosition.latitude+(1-v)*startPosition.latitude;
+                                        if(currhospital<destinationsignals.size() && destinationsignals.get(currhospital).getLat()>lat && destinationsignals.get(currhospital).getLng()>lng)
+                                        {
+                                            service.turnlightsnormal(destinationsignals.get(currhospital).getId()).enqueue(new Callback() {
+                                                @Override
+                                                public void onResponse(Call call, Response response) {
+                                                    Toast.makeText(MapActivity.this,"success",Toast.LENGTH_SHORT).show();
+                                                }
+
+                                                @Override
+                                                public void onFailure(Call call, Throwable t) {
+                                                    Toast.makeText(MapActivity.this,"fail",Toast.LENGTH_SHORT).show();
+
+                                                }
+                                            });
+                                            currhospital++;
+                                        }
                                         LatLng newPos=new LatLng(lat,lng);
                                         marker.setPosition(newPos);
                                         marker.setAnchor(0.5f,0.5f);
@@ -198,22 +273,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         },3000);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        for (int i = 0; i < hospitalwaylist.size() - 1; i++) {
+                         for (int i = 0; i < hospitalwaylist.size() - 1; i++) {
                             LatLng src = hospitalwaylist.get(i);
                             LatLng dest = hospitalwaylist.get(i + 1);
 

@@ -12,7 +12,12 @@ public class route_detail {
     @SerializedName("hospitalWayPoints")
     @Expose
     private ArrayList<ArrayList<Double>> hospitalWayPoints;
-//    "hospitalWayPoints"
+    @SerializedName("destinationSignals")
+    @Expose
+    private ArrayList<location> destinationSignals;
+    @SerializedName("hospitalSignals")
+    @Expose
+    private ArrayList<location> hospitalSignals;
 
 
     public ArrayList<ArrayList<Double>> getLocations() {
@@ -29,5 +34,21 @@ public class route_detail {
 
     public void setHospitalWayPoints(ArrayList<ArrayList<Double>> hospitalWayPoints) {
         this.hospitalWayPoints = hospitalWayPoints;
+    }
+
+    public ArrayList<location> getDestinationSignals() {
+        return destinationSignals;
+    }
+
+    public void setDestinationSignals(ArrayList<location> destinationSignals) {
+        this.destinationSignals = destinationSignals;
+    }
+
+    public ArrayList<location> getHospitalSignals() {
+        return hospitalSignals;
+    }
+
+    public void setHospitalSignals(ArrayList<location> hospitalSignals) {
+        this.hospitalSignals = hospitalSignals;
     }
 }
