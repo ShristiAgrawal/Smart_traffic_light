@@ -77,10 +77,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         BitmapDrawable bitmapdraw = (BitmapDrawable) getResources().getDrawable(R.drawable.car_marker);
         Bitmap b = bitmapdraw.getBitmap();
         BitMapMarker= Bitmap.createScaledBitmap(b, 110, 60, false);
-        BitmapDrawable draw = (BitmapDrawable) getResources().getDrawable(R.drawable.green);
+        BitmapDrawable draw = (BitmapDrawable) getResources().getDrawable(R.drawable.red_abcd);
         Bitmap b2 = draw.getBitmap();
         marker1= Bitmap.createScaledBitmap(b2, 60, 60, false);
-        BitmapDrawable draw2 = (BitmapDrawable) getResources().getDrawable(R.drawable.redarr);
+        BitmapDrawable draw2 = (BitmapDrawable) getResources().getDrawable(R.drawable.abcd);
         Bitmap b3 = draw2.getBitmap();
         marker2= Bitmap.createScaledBitmap(b3, 60, 60, false);
         search.setOnClickListener(new View.OnClickListener() {
@@ -146,19 +146,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                             else dest=list.get(list.size()-1);
                             map.addMarker(new MarkerOptions()
                                     .position(src)
-                                    .icon(BitmapDescriptorFactory.fromBitmap(marker2))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(marker1))
                                     .rotation(90+getBearing(src,dest)));
                             map.addMarker(new MarkerOptions()
                                     .position(src)
-                                    .icon(BitmapDescriptorFactory.fromBitmap(marker2))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(marker1))
                                     .rotation(270+getBearing(src,dest)));
                             map.addMarker(new MarkerOptions()
                                     .position(src)
-                                    .icon(BitmapDescriptorFactory.fromBitmap(marker1))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(marker2))
                                     .rotation(getBearing(src,dest)));
                             map.addMarker(new MarkerOptions()
                                     .position(src)
-                                    .icon(BitmapDescriptorFactory.fromBitmap(marker1))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(marker2))
                                     .rotation(180+getBearing(src,dest)));
 
                         }
