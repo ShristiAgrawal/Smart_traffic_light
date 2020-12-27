@@ -1,4 +1,4 @@
-# Smart Traffic Light 
+# Smart Traffic Light [ Hosted here ](http://34.87.155.79:7000/)
 
 - View the [Project documentation here](https://drive.google.com/file/d/154ADJy3Ga9-2AIqpzzOIytc2UZ3r4cOs/view?usp=sharing)
 - View the [Final Presentation PowerPoint here](https://drive.google.com/file/d/1uzcWg4-bDfg9ymzYnNSm4W6SRSHFbR1F/view?usp=sharing). 
@@ -14,6 +14,7 @@ In this project we propose a new architecture named CSTMC to address the limitat
 1. Shristi Agrawal	
 
 #### Screenshots:
+<img src='swagger.png'/>
 <img src='image016.png'/>
 
 <div style='display:inline' >
